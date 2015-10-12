@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 
 """
 Project-wide application configuration.
 """
 
 import os
-
 from authomatic.providers import oauth2
 from authomatic import Authomatic
 
@@ -21,8 +19,8 @@ ASSETS_SLUG = PROJECT_SLUG
 
 # The name of the repository containing the source
 REPOSITORY_NAME = 'dailygraphics'
-REPOSITORY_URL = 'git@github.com:nprapps/%s.git' % REPOSITORY_NAME
-REPOSITORY_ALT_URL = None # 'git@bitbucket.org:nprapps/%s.git' % REPOSITORY_NAME'
+REPOSITORY_URL = 'git@github.com:TheLens/%s.git' % REPOSITORY_NAME
+REPOSITORY_ALT_URL = None
 
 # Path to the folder containing the graphics
 GRAPHICS_PATH = os.path.abspath('../graphics')
@@ -32,6 +30,8 @@ TEMPLATES_PATH = os.path.abspath('graphic_templates')
 
 """
 OAUTH
+
+Don't plan on using this for The Lens, but configuring anyway.
 """
 
 GOOGLE_OAUTH_CREDENTIALS_PATH = '~/.google_oauth_credentials'
@@ -42,7 +42,10 @@ authomatic_config = {
         'class_': oauth2.Google,
         'consumer_key': os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
         'consumer_secret': os.environ.get('GOOGLE_OAUTH_CONSUMER_SECRET'),
-        'scope': ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/userinfo.email'],
+        'scope': [
+            'https://www.googleapis.com/auth/drive',
+            'https://www.googleapis.com/auth/userinfo.email'
+        ],
         'offline': True,
     },
 }
@@ -53,17 +56,17 @@ authomatic = Authomatic(authomatic_config, os.environ.get('AUTHOMATIC_SALT'))
 DEPLOYMENT
 """
 PRODUCTION_S3_BUCKET = {
-    'bucket_name': 'apps.npr.org',
+    'bucket_name': 'projects.thelensnola.org',
     'region': 'us-east-1'
 }
 
 STAGING_S3_BUCKET = {
-    'bucket_name': 'stage-apps.npr.org',
+    'bucket_name': 'stage-projects.thelensnola.org',
     'region': 'us-east-1'
 }
 
 ASSETS_S3_BUCKET = {
-    'bucket_name': 'assets.apps.npr.org',
+    'bucket_name': 'assets.projects.thelensnola.org',
     'region': 'us-east-1'
 }
 
@@ -75,7 +78,7 @@ ANALYTICS
 """
 
 GOOGLE_ANALYTICS = {
-    'ACCOUNT_ID': 'UA-5828686-75'
+    'ACCOUNT_ID': 'UA-66829612-1'  # The Lens
 }
 
 # These variables will be set at runtime. See configure_targets() below
@@ -83,6 +86,7 @@ S3_BUCKET = None
 S3_BASE_URL = ''
 S3_DEPLOY_URL = None
 DEBUG = True
+
 
 def configure_targets(deployment_target):
     """
