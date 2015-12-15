@@ -1,32 +1,37 @@
 @import "base";
 
+/* All 'external' classes are new to The Lens. */
+
 svg {
     font-size: 20px;
-    background-color: #d3eaf7;
+    background-color: #D3EAF7;
+    font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
 }
 
 .countries path {
-    fill: #ddd;
-    stroke: #ebebeb;
+    fill: #DDD;
+    stroke: #EBEBEB;
     stroke-width: 2.5px;
 
     &.primary {
-        fill: #fff;
-        stroke: #bababa;
+        fill: #FFF; // Land color
+        stroke: #BABABA; // Land border color
     }
 }
 
-path.landmass { fill: #a8d5ef; }
+path.landmass {
+    fill: #A8D5EF;
+}
 
 .lakes path {
-    fill: #d3eaf7;
-    stroke: #a8d5ef;
+    fill: #D3EAF7;
+    stroke: #A8D5EF;
     stroke-width: 1px;
 }
 
 .rivers path {
     fill: none;
-    stroke: #a8d5ef;
+    stroke: #A8D5EF;
     stroke-width: 1px;
 }
 
@@ -40,7 +45,7 @@ path.landmass { fill: #a8d5ef; }
     fill: #787878;
     font-size: 65%;
     text-anchor: start;
-    font-family: 'Gotham SSm', Helvetica, Arial,sans-serif;
+    font-family: "news-gothic-std", Helvetica, Arial,sans-serif;
     -webkit-font-smoothing: antialiased;
 
     &.admin-0-capital {
@@ -50,10 +55,10 @@ path.landmass { fill: #a8d5ef; }
 }
 
 .city-labels.shadow text {
-    fill: #fff;
-    stroke: #fff;
+    fill: #FFF;
+    stroke: #FFF;
     stroke-width: 2px;
-    opacity: .7;
+    opacity: 0.7;
 }
 
 .country-labels text {
@@ -62,7 +67,7 @@ path.landmass { fill: #a8d5ef; }
     text-transform: uppercase;
     letter-spacing: 7px;
     text-anchor: middle;
-    font-family: 'Gotham SSm', Helvetica, Arial,sans-serif;
+    font-family: "news-gothic-std", Helvetica, Arial,sans-serif;
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
 
@@ -80,11 +85,35 @@ path.landmass { fill: #a8d5ef; }
         stroke-width: 5px;
     }
     text {
-        font-family: Helvetica, Arial,sans-serif;
+        font-family: "news-gothic-std", Helvetica, Arial,sans-serif;
         fill: #666;
         font-size: 60%;
         -webkit-font-smoothing: antialiased;
     }
+}
+
+/* New for The Lens */
+// Label dot
+.external path {
+    fill: #333;
+    // stroke: #000;
+    // stroke-width: 2px;
+}
+// Label text
+.external-labels text {
+    fill: #555; // #787878;
+    font-size: 65%;
+    text-anchor: start;
+    font-family: "news-gothic-std", Helvetica, Arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-weight: bold;
+}
+// TODO: What is this for?
+.external-labels.shadow text {
+    fill: #FFF;
+    stroke: #FFF;
+    stroke-width: 2px;
+    opacity: 0.7;
 }
 
 // responsive styles
@@ -101,6 +130,18 @@ path.landmass { fill: #a8d5ef; }
     .city-labels.shadow { display: none; }
     .city-labels text,
     .cities path {
+        &.scalerank-4,
+        &.scalerank-5,
+        &.scalerank-6,
+        &.scalerank-7,
+        &.scalerank-8 {
+            display: none;
+        }
+    }
+    .external-labels text { letter-spacing: .5px; }
+    .external-labels.shadow { display: none; }
+    .external-labels text,
+    .external path {
         &.scalerank-4,
         &.scalerank-5,
         &.scalerank-6,

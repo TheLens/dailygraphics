@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import codecs
 from datetime import datetime
@@ -9,13 +8,13 @@ import urllib
 import subprocess
 import sys
 
-from flask import Markup, g, render_template, request
+from flask import Markup, g, request
 from slimit import minify
 from smartypants import smartypants
 from jinja2 import contextfunction, Template
 
 import app_config
-import copytext
+
 
 class BetterJSONEncoder(json.JSONEncoder):
     """
@@ -28,6 +27,7 @@ class BetterJSONEncoder(json.JSONEncoder):
             encoded_object = json.JSONEncoder.default(self, obj)
 
         return encoded_object
+
 
 class Includer(object):
     """
@@ -78,7 +78,8 @@ class Includer(object):
                 # See "fab render"
                 g.compiled_includes[path] = timestamp_path
 
-            markup = Markup(self.tag_string % self._relativize_path(timestamp_path))
+            markup = Markup(self.tag_string % self._relativize_path(
+                timestamp_path))
         else:
             response = ','.join(self.includes)
 
@@ -92,9 +93,11 @@ class Includer(object):
 
         return markup
 
+
 class JavascriptIncluder(Includer):
     """
-    Psuedo-template tag that handles collecting Javascript and serving appropriate clean or compressed versions.
+    Psuedo-template tag that handles collecting Javascript and serving
+    appropriate clean or compressed versions.
     """
     def __init__(self, *args, **kwargs):
         Includer.__init__(self, *args, **kwargs)
@@ -121,9 +124,11 @@ class JavascriptIncluder(Includer):
 
         return '\n'.join(output)
 
+
 class CSSIncluder(Includer):
     """
-    Psuedo-template tag that handles collecting CSS and serving appropriate clean or compressed versions.
+    Psuedo-template tag that handles collecting CSS and serving appropriate
+    clean or compressed versions.
     """
     def __init__(self, *args, **kwargs):
         Includer.__init__(self, *args, **kwargs)
@@ -141,16 +146,21 @@ class CSSIncluder(Includer):
             src_paths.append(css_path)
 
             try:
-                compressed_src = subprocess.check_output(["node_modules/less/bin/lessc", "-x", css_path])
+                compressed_src = subprocess.check_output([
+                    "node_modules/less/bin/lessc",
+                    "-x",
+                    css_path])
                 output.append(compressed_src)
             except:
-                print 'It looks like "lessc" isn\'t installed. Try running: "npm install"'
+                print 'It looks like "lessc" isn\'t installed. ' + \
+                    'Try running: "npm install"'
                 raise
 
         context = make_context()
         context['paths'] = src_paths
 
         return '\n'.join(output)
+
 
 def load_graphic_config(graphic_path, base_paths=[]):
     """
@@ -174,6 +184,7 @@ def load_graphic_config(graphic_path, base_paths=[]):
 
     return graphic_config
 
+
 def flatten_app_config():
     """
     Returns a copy of app_config containing only
@@ -187,6 +198,7 @@ def flatten_app_config():
             config[k] = v
 
     return config
+
 
 def make_context(asset_depth=0, root_path='www'):
     """
@@ -210,6 +222,7 @@ def make_context(asset_depth=0, root_path='www'):
 
     return context
 
+
 def urlencode_filter(s):
     """
     Filter to urlencode strings.
@@ -226,6 +239,7 @@ def urlencode_filter(s):
 
     return Markup(s)
 
+
 def smarty_filter(s):
     """
     Filter to smartypants strings.
@@ -237,7 +251,6 @@ def smarty_filter(s):
     if type(s) is not unicode:
         s = unicode(s)
 
-
     s = s.encode('utf-8')
     s = smartypants(s)
 
@@ -246,6 +259,7 @@ def smarty_filter(s):
     except:
         print 'This string failed to encode: %s' % s
         return Markup(s)
+
 
 @contextfunction
 def render_with_context(context, text):

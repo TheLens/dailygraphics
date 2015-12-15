@@ -1,17 +1,16 @@
- #!/usr/bin/env python
 
 import boto
-import imp
 import json
 import os
+import csv
+import xlrd
+from slugify import slugify
 import subprocess
-import sys
 import webbrowser
 
 from distutils.spawn import find_executable
-from fabric.api import local, prompt, require, settings, task
+from fabric.api import local, require, task
 from fabric.state import env
-from glob import glob
 from oauth import get_document, get_credentials
 from time import sleep
 
@@ -23,8 +22,10 @@ import utils
 
 from render_utils import load_graphic_config
 
-SPREADSHEET_COPY_URL_TEMPLATE = 'https://www.googleapis.com/drive/v2/files/%s/copy'
-SPREADSHEET_VIEW_TEMPLATE = 'https://docs.google.com/spreadsheet/ccc?key=%s#gid=1'
+SPREADSHEET_COPY_URL_TEMPLATE = 'https://www.googleapis.com/drive/v2/files/' + \
+    '%s/copy'
+SPREADSHEET_VIEW_TEMPLATE = 'https://docs.google.com/spreadsheet/ccc?key=' + \
+    '%s#gid=1'
 
 """
 Base configuration
@@ -38,6 +39,8 @@ Changing environment requires a full-stack test.
 An environment points to both a server and an S3
 bucket.
 """
+
+
 @task
 def production():
     """
@@ -45,6 +48,7 @@ def production():
     """
     env.settings = 'production'
     app_config.configure_targets(env.settings)
+
 
 @task
 def staging():
@@ -57,12 +61,16 @@ def staging():
 """
 Running the app
 """
+
+
 @task
 def app(port='8000'):
     """
     Serve app.py.
     """
-    local('gunicorn -b 0.0.0.0:%s --timeout 3600 --debug --reload app:wsgi_app' % port)
+    local(
+        'gunicorn -b 0.0.0.0:%s ' % port +
+        '--timeout 3600 --debug --reload app:wsgi_app')
 
 """
 Deployment
@@ -71,6 +79,8 @@ Changes to deployment requires a full-stack test. Deployment
 has two primary functions: Pushing flat files to S3 and deploying
 code to a remote server if required.
 """
+
+
 @task
 def deploy(slug):
     """
@@ -82,16 +92,28 @@ def deploy(slug):
         print 'You must specify a project slug, like this: "deploy:slug"'
         return
 
+    if env.settings is None:  # Staging/production not set.
+        print 'You must select a target. Ex. fab staging deploy:slug.'
+        return
+
     graphic_root = '%s/%s' % (app_config.GRAPHICS_PATH, slug)
     s3_root = '%s/graphics/%s' % (app_config.PROJECT_SLUG, slug)
     graphic_assets = '%s/assets' % graphic_root
     s3_assets = '%s/assets' % s3_root
 
+    # New to The Lens. Check if fallback image has been created
+    if not os.path.isfile('%s/fallback.png' % graphic_root):
+        print 'Render a fallback image before deploying. ' + \
+            'Run "fab render.save_fallback_image:slug".'
+        return
+
     graphic_config = load_graphic_config(graphic_root)
 
     use_assets = getattr(graphic_config, 'USE_ASSETS', True)
-    default_max_age = getattr(graphic_config, 'DEFAULT_MAX_AGE', None) or app_config.DEFAULT_MAX_AGE
-    assets_max_age = getattr(graphic_config, 'ASSETS_MAX_AGE', None) or app_config.ASSETS_MAX_AGE
+    default_max_age = getattr(
+        graphic_config, 'DEFAULT_MAX_AGE', None) or app_config.DEFAULT_MAX_AGE
+    assets_max_age = getattr(
+        graphic_config, 'ASSETS_MAX_AGE', None) or app_config.ASSETS_MAX_AGE
 
     update_copy(slug)
 
@@ -127,8 +149,92 @@ def deploy(slug):
             }
         )
 
-    print ''
-    print '%s URL: %s/graphics/%s/' % (env.settings.capitalize(), app_config.S3_BASE_URL, slug)
+    print '\n%s URL: %s/graphics/%s/' % (
+        env.settings.capitalize(), app_config.S3_BASE_URL, slug)
+
+
+@task
+def deploy_templates():
+    '''
+    Syncs local templates directory with staging and production.
+
+    New for The Lens.
+    '''
+
+    temp_dir = '/Users/thomasthoren/projects/dailygraphics/graphic_templates'
+
+    s3_staging_url = 's3://staging-projects.thelensnola.org/' + \
+        'dailygraphics/templates'
+    s3_production_url = 's3://projects.thelensnola.org/dailygraphics/templates'
+
+    # Sync everything to S3.
+    local(
+        'aws s3 sync ' +
+        '%s/ ' % temp_dir +
+        's3://staging-projects.thelensnola.org/dailygraphics/templates/ ' +
+        '--exclude "_base/*" ' +
+        '--exclude "_thumbs/*" ' +
+        '--exclude "*.DS_Store" ' +
+        '--acl public-read')
+    local(
+        'aws s3 sync ' +
+        '%s/ ' % temp_dir +
+        's3://projects.thelensnola.org/dailygraphics/templates/ ' +
+        '--exclude "_base/*" ' +
+        '--exclude "_thumbs/*" ' +
+        '--exclude "*.DS_Store" ' +
+        '--acl public-read')
+
+    # Copy pym.js to directories.
+    awscli_string = 'aws s3 sync %s/_base/js/ %s/%s/js/ --acl public-read'
+
+    local(awscli_string % (temp_dir, s3_staging_url, 'bar_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'block_histogram'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'column_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'dot_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'grouped_bar_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'line_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'locator_map'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'slopegraph'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'stacked_bar_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'stacked_column_chart'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'state_grid_map'))
+    local(awscli_string % (temp_dir, s3_staging_url, 'table'))
+
+    local(awscli_string % (temp_dir, s3_production_url, 'bar_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'block_histogram'))
+    local(awscli_string % (temp_dir, s3_production_url, 'column_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'dot_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'grouped_bar_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'line_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'locator_map'))
+    local(awscli_string % (temp_dir, s3_production_url, 'slopegraph'))
+    local(awscli_string % (temp_dir, s3_production_url, 'stacked_bar_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'stacked_column_chart'))
+    local(awscli_string % (temp_dir, s3_production_url, 'state_grid_map'))
+    local(awscli_string % (temp_dir, s3_production_url, 'table'))
+
+
+@task
+def deploy_table_of_contents():
+    '''
+    Syncs table of contents with S3.
+
+    New for The Lens.
+    '''
+
+    local(
+        'aws s3 cp ' +
+        '/Users/thomasthoren/projects/dailygraphics/index.html ' +
+        's3://staging-projects.thelensnola.org/dailygraphics/index.html ' +
+        '--acl public-read')
+
+    local(
+        'aws s3 cp ' +
+        '/Users/thomasthoren/projects/dailygraphics/index.html ' +
+        's3://projects.thelensnola.org/dailygraphics/index.html ' +
+        '--acl public-read')
+
 
 def download_copy(slug):
     """
@@ -142,12 +248,68 @@ def download_copy(slug):
         print '%s/graphic_config.py does not exist.' % slug
         return
 
-    if not hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') or not graphic_config.COPY_GOOGLE_DOC_KEY:
-        print 'COPY_GOOGLE_DOC_KEY is not defined in %s/graphic_config.py.' % slug
+    # The new file's Google key ID.
+    new_file_key = graphic_config.COPY_GOOGLE_DOC_KEY
+
+    if not hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') or not new_file_key:
+        print 'COPY_GOOGLE_DOC_KEY is not defined in ' + \
+            '%s/graphic_config.py.' % slug
         return
 
     copy_path = os.path.join(graphic_path, '%s.xlsx' % slug)
-    get_document(graphic_config.COPY_GOOGLE_DOC_KEY, copy_path)
+    get_document(new_file_key, copy_path)
+
+
+@task
+def save_sheet_as_csv(slug):
+    '''
+    Extracts a sheet as CSV from the Google Sheet download (Excel workbook).
+
+    Only allows for one tab for now.
+    '''
+
+    graphic_path = '%s/%s' % (app_config.GRAPHICS_PATH, slug)
+    workbook_file = os.path.join(graphic_path, '%s.xlsx' % slug)
+
+    sheet_id = 3  # The targeted tab (zero-based index).
+
+    workbook = xlrd.open_workbook(workbook_file)
+    # datemode = workbook.datemode
+    worksheets = workbook.sheet_names()
+    worksheet = workbook.sheet_by_name(worksheets[sheet_id])
+
+    headers = {}
+    cell_id = 0
+    row_id = 0
+    while cell_id < worksheet.ncols:
+        cell_type = worksheet.cell_type(row_id, cell_id)
+        cell_value = worksheet.cell_value(row_id, cell_id)
+        cell_value = str(slugify(cell_value).replace('-', '_')).strip()
+        if cell_type == 1:  # If unicode
+            headers[cell_id] = cell_value
+        cell_id += 1
+
+    csv_file = os.path.join(graphic_path, 'data/external.csv')
+
+    with open(csv_file, "w") as filename:
+        writer = csv.DictWriter(filename, fieldnames=headers.values())
+        writer.writeheader()
+
+        row_id = 1
+        while row_id < worksheet.nrows:
+            cell_id = 0
+            row_dict = {}
+            while cell_id < worksheet.ncols:
+                header = headers[cell_id]
+
+                cell_value = worksheet.cell_value(row_id, cell_id)
+
+                row_dict[header] = cell_value
+                cell_id += 1
+
+            writer.writerow(row_dict)
+            row_id += 1
+
 
 @task
 def update_copy(slug=None):
@@ -156,6 +318,7 @@ def update_copy(slug=None):
     """
     if slug:
         download_copy(slug)
+        # save_sheet_as_csv(slug)  # Only want to run after mapturner
         return
 
     slugs = os.listdir(app_config.GRAPHICS_PATH)
@@ -168,11 +331,14 @@ def update_copy(slug=None):
 
         print slug
         download_copy(slug)
+        # save_sheet_as_csv(slug)  # Only want to run after mapturner
 
 
 """
 App-specific commands
 """
+
+
 def _add_graphic(slug, template):
     """
     Create a graphic with `slug` from `template`
@@ -194,6 +360,7 @@ def _add_graphic(slug, template):
 
         if success:
             download_copy(slug)
+            # save_sheet_as_csv(slug)  # Only want to run after mapturner
         else:
             local('rm -r graphic_path')
             print 'Failed to copy spreadsheet! Try again!'
@@ -201,7 +368,11 @@ def _add_graphic(slug, template):
     else:
         print 'No graphic_config.py found, not creating spreadsheet'
 
-    print 'Run `fab app` and visit http://127.0.0.1:8000/graphics/%s to view' % slug
+    print 'Run `fab app` and visit http://127.0.0.1:8000/graphics/' + \
+        '%s to view' % slug
+
+    # local('open http://127.0.0.1:8000/graphics/%s' % slug)
+
 
 def _check_slug(slug):
     """
@@ -213,11 +384,13 @@ def _check_slug(slug):
         return True
 
     try:
-        bucket = utils.get_bucket(app_config.PRODUCTION_S3_BUCKET['bucket_name'])
-        key = bucket.get_key('%s/graphics/%s/child.html' % (app_config.PROJECT_SLUG, slug))
+        bucket = utils.get_bucket(
+            app_config.PRODUCTION_S3_BUCKET['bucket_name'])
+        key = bucket.get_key('%s/graphics/%s/child.html' % (
+            app_config.PROJECT_SLUG, slug))
 
         if key:
-            print 'Error: Slug exists on apps.npr.org'
+            print 'Error: Slug already exists either locally or on S3.'
             return True
     except boto.exception.NoAuthHandlerFound:
         print 'Could not authenticate, skipping Amazon S3 check'
@@ -226,12 +399,14 @@ def _check_slug(slug):
 
     return False
 
+
 @task
 def add_graphic(slug):
     """
     Create a basic project.
     """
     _add_graphic(slug, 'graphic')
+
 
 @task
 def add_bar_chart(slug):
@@ -240,12 +415,14 @@ def add_bar_chart(slug):
     """
     _add_graphic(slug, 'bar_chart')
 
+
 @task
 def add_column_chart(slug):
     """
     Create a column chart.
     """
     _add_graphic(slug, 'column_chart')
+
 
 @task
 def add_stacked_column_chart(slug):
@@ -254,12 +431,14 @@ def add_stacked_column_chart(slug):
     """
     _add_graphic(slug, 'stacked_column_chart')
 
+
 @task
 def add_block_histogram(slug):
     """
     Create a block histogram.
     """
     _add_graphic(slug, 'block_histogram')
+
 
 @task
 def add_grouped_bar_chart(slug):
@@ -268,12 +447,14 @@ def add_grouped_bar_chart(slug):
     """
     _add_graphic(slug, 'grouped_bar_chart')
 
+
 @task
 def add_stacked_bar_chart(slug):
     """
     Create a stacked bar chart.
     """
     _add_graphic(slug, 'stacked_bar_chart')
+
 
 @task
 def add_state_grid_map(slug):
@@ -282,12 +463,14 @@ def add_state_grid_map(slug):
     """
     _add_graphic(slug, 'state_grid_map')
 
+
 @task
 def add_line_chart(slug):
     """
     Create a line chart.
     """
     _add_graphic(slug, 'line_chart')
+
 
 @task
 def add_dot_chart(slug):
@@ -296,12 +479,14 @@ def add_dot_chart(slug):
     """
     _add_graphic(slug, 'dot_chart')
 
+
 @task
 def add_slopegraph(slug):
     """
     Create a slopegraph (intended for narrow display)
     """
     _add_graphic(slug, 'slopegraph')
+
 
 @task
 def add_map(slug):
@@ -310,6 +495,7 @@ def add_map(slug):
     """
     _add_graphic(slug, 'locator_map')
 
+
 @task
 def add_table(slug):
     """
@@ -317,17 +503,31 @@ def add_table(slug):
     """
     _add_graphic(slug, 'table')
 
+
 def _check_credentials():
     """
     Check credentials and spawn server and browser if not
     """
     credentials = get_credentials()
-    if not credentials or 'https://www.googleapis.com/auth/drive' not in credentials.config['google']['scope']:
+
+    scope = credentials.config['google']['scope']
+    if not credentials or 'https://www.googleapis.com/auth/drive' not in scope:
         try:
             with open(os.devnull, 'w') as fnull:
-                print 'Credentials were not found or permissions were not correct. Automatically opening a browser to authenticate with Google.'
+                print 'Credentials were not found or permissions were not ' + \
+                    'correct. Automatically opening a browser to ' + \
+                    'authenticate with Google.'
                 gunicorn = find_executable('gunicorn')
-                process = subprocess.Popen([gunicorn, '-b', '127.0.0.1:8888', 'app:wsgi_app'], stdout=fnull, stderr=fnull)
+                process = subprocess.Popen(
+                    [
+                        gunicorn,
+                        '-b',
+                        '127.0.0.1:8888',
+                        'app:wsgi_app'
+                    ],
+                    stdout=fnull,
+                    stderr=fnull
+                )
                 webbrowser.open_new('http://127.0.0.1:8888/oauth')
                 print 'Waiting...'
                 while not credentials:
@@ -342,41 +542,83 @@ def _check_credentials():
             print '\nCtrl-c pressed. Later, skater!'
             exit()
 
+
 def copy_spreadsheet(slug):
     """
-    Copy the COPY spreadsheet
+    Copy the template Google spreadsheet into the graphics folder on Drive.
     """
     _check_credentials()
 
     config_path = '%s/%s/' % (app_config.GRAPHICS_PATH, slug)
     graphic_config = load_graphic_config(config_path)
 
-    if not hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') or not graphic_config.COPY_GOOGLE_DOC_KEY:
-        print 'Skipping spreadsheet creation. (COPY_GOOGLE_DOC_KEY is not defined in %s/graphic_config.py.)' % slug
+    new_file_key = graphic_config.COPY_GOOGLE_DOC_KEY
+
+    if not hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') or not new_file_key:
+        print 'Skipping spreadsheet creation. (COPY_GOOGLE_DOC_KEY is not ' + \
+            'defined in %s/graphic_config.py.)' % slug
         return
 
+    req_url = SPREADSHEET_COPY_URL_TEMPLATE % graphic_config.COPY_GOOGLE_DOC_KEY
     kwargs = {
         'credentials': get_credentials(),
-        'url': SPREADSHEET_COPY_URL_TEMPLATE % graphic_config.COPY_GOOGLE_DOC_KEY,
+        'url': req_url,
         'method': 'POST',
         'headers': {'Content-Type': 'application/json'},
         'body': json.dumps({
-            'title': '%s GRAPHIC COPY' % slug,
+            'title': slug
         }),
     }
 
     resp = app_config.authomatic.access(**kwargs)
 
-    if resp.status == 200:
+    if resp.status == 200:  # Sucessfully created file
+        print resp
         spreadsheet_key = resp.data['id']
-        spreadsheet_url = SPREADSHEET_VIEW_TEMPLATE % spreadsheet_key
-        print 'New spreadsheet created successfully!'
-        print 'View it online at %s' % spreadsheet_url
-        utils.replace_in_file('%s/graphic_config.py' % config_path , graphic_config.COPY_GOOGLE_DOC_KEY, spreadsheet_key)
 
-        return True
+        # Copy file in Drive from 'templates' to 'graphics' directory.
+        graphics_dir_key = '0B95Rq71MRLfHY0gxUURqbS1tWDg'  # TODO: move to cfg
+        request_url = 'https://www.googleapis.com/drive/v2/files/' + \
+            '%s/parents' % spreadsheet_key
+        kwargs = {
+            'credentials': get_credentials(),
+            'url': request_url,
+            'method': 'POST',
+            'headers': {'Content-Type': 'application/json'},
+            'body': json.dumps({
+                'id': graphics_dir_key
+            })
+        }
+        resp2 = app_config.authomatic.access(**kwargs)
 
-        utils.replace_in_file(config_path, graphic_config.COPY_GOOGLE_DOC_KEY, '')
+        if resp2.status == 200:  # Successfully copied file to 'graphics' folder
+            # Delete old file from 'templates' directory.
+            templates_dir_key = '0B95Rq71MRLfHeTlSNmtnWmEwQ28'
+            request_url = 'https://www.googleapis.com/drive/v2/files/' + \
+                '%s/parents/%s' % (spreadsheet_key, templates_dir_key)
+            kwargs = {
+                'credentials': get_credentials(),
+                'url': request_url,
+                'method': 'DELETE',
+                'headers': {'Content-Type': 'application/json'}
+            }
+            resp3 = app_config.authomatic.access(**kwargs)
 
-    print 'Error creating spreadsheet (status code %s) with message %s' % (resp.status, resp.reason)
+            if resp3.status == 204:  # Successfully deleted old file
+                spreadsheet_url = SPREADSHEET_VIEW_TEMPLATE % spreadsheet_key
+                print 'New spreadsheet created successfully!'
+                # local('open %s' % spreadsheet_url)
+                print 'View it online at %s' % spreadsheet_url
+                utils.replace_in_file(
+                    '%s/graphic_config.py' % config_path,
+                    graphic_config.COPY_GOOGLE_DOC_KEY,
+                    spreadsheet_key)
+
+                return True
+
+                utils.replace_in_file(
+                    config_path, graphic_config.COPY_GOOGLE_DOC_KEY, '')
+
+    print 'Error creating spreadsheet (status code %s) with message %s' % (
+        resp.status, resp.reason)
     return False

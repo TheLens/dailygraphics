@@ -21,8 +21,7 @@
 ## Text
 
 * Is the headline human-friendly? (conversational, non-technical)
-* Is Every Word In The Headline Capitalized? (NPR headline style)
-* Are quotes in the headline singular and escaped? (&amp;lsquo;)
+* Are quotes in the headline singular and escaped? (&lsquo;)
 * Does the Source line link back, if possible?
 * Does the Credit line include everyone who worked on the graphic?
 * Do the footnotes explain all caveats a normal reader would need to know to understand the chart fully?
@@ -33,7 +32,7 @@
 * Are we only including data we’re actually displaying (to keep page weight down)?
 * Have you created a static fallback image for your final graphic? (fallback.png)
   * If there have been late edits to your graphic, have you updated the fallback image?
-* Are all links out target="_blank" so they don't open inside the iframe.
+* Are all links out target="_blank" so they don't open inside the iframe?
 
 ## Charts
 
@@ -54,8 +53,5 @@
 
 ## Process / Project Management
 
-* Has the graphic been edited by Alyson?
-* Has the graphic gone through line edit and copy edit?
-  * Line edit: Review/edit by a digital editor
-  * Copy edit: Final edit by the copy desk. Most daily graphics are copy edited at the same time as their stories. But more complex graphics should go to copyedit before that, to give editors more time to review.
-* Have you added the graphic to the Graphics Archive page in Confluence?
+* Has the graphic been edited?
+* Has the graphic gone through a copy edit?

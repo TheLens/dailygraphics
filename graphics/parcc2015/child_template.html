@@ -1,0 +1,67 @@
+{% extends 'base_template.html' %}
+
+{% block content %}
+
+    {% if COPY.labels.headline %}<h1>{{ COPY.labels.headline }}</h1>{% endif %}
+    {% if COPY.labels.subhed %}<h2>{{ render(COPY.labels.subhed) }}</h2>{% endif %}
+
+    <div id="graphic">
+        <table>
+            <thead>
+                <tr>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_school }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_1 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_2 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_3 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_4 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_5 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_6 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_7 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_8 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_9 }}</th>
+                    <th style="word-break: keep-all;">{{ COPY.labels.hdr_10 }}</th>
+                </tr>
+            </thead>
+
+            {% for row in COPY.data %}
+            <tr class="{{ row.hdr_school|classify }}" {% if row.hdr_school != '3rd grade' and row.hdr_school != '4th grade' and row.hdr_school != '5th grade' and row.hdr_school != '6th grade' and row.hdr_school != '7th grade' and row.hdr_school != '8th grade' %}style="background-color: #D6D6D6;"{% endif %}>
+                <td data-title="{{ COPY.labels.hdr_school }}">{{ row.hdr_school }}</td>
+                <td data-title="{{ COPY.labels.hdr_1 }}">{{ row.hdr_1 }}</td>
+                <td data-title="{{ COPY.labels.hdr_2 }}">{{ row.hdr_2 }}</td>
+                <td data-title="{{ COPY.labels.hdr_3 }}">{{ row.hdr_3 }}</td>
+                <td data-title="{{ COPY.labels.hdr_4 }}">{{ row.hdr_4 }}</td>
+                <td data-title="{{ COPY.labels.hdr_5 }}">{{ row.hdr_5 }}</td>
+                <td data-title="{{ COPY.labels.hdr_6 }}">{{ row.hdr_6 }}</td>
+                <td data-title="{{ COPY.labels.hdr_7 }}">{{ row.hdr_7 }}</td>
+                <td data-title="{{ COPY.labels.hdr_8 }}">{{ row.hdr_8 }}</td>
+                <td data-title="{{ COPY.labels.hdr_9 }}">{{ row.hdr_9 }}</td>
+                <td data-title="{{ COPY.labels.hdr_10 }}">{{ row.hdr_10 }}</td>
+
+
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+
+    {% if COPY.labels.footnote %}
+    <div class="footnotes">
+        <h4>Notes</h4>
+        <p>{{ COPY.labels.footnote }}</p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        {% if COPY.labels.source %}<p>Source: {{ COPY.labels.source }}</p>{% endif %}
+        {% if COPY.labels.credit %}<p>Credit: {{ COPY.labels.credit }}</p>{% endif %}
+    </div>
+
+{% endblock content %}
+
+{% block js %}
+
+    {{ JS.push('js/lib/pym.js') }}
+    {{ JS.push('js/graphic.js') }}
+    {{ JS.render('js/graphic-footer.js') }}
+
+{% endblock js %}

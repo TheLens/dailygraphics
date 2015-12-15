@@ -13,6 +13,7 @@ from fabric.api import prompt, task
 import app_config
 import utils
 
+
 @task
 def sync(slug):
     """
@@ -57,9 +58,10 @@ def sync(slug):
 
             local_paths.append(full_path)
 
-    # Prevent case sensitivity differences between OSX and S3 from screwing us up
+    # Prevent case sensitivity differences between OSX and S3 from messing up
     if not_lowercase:
-        print 'The following filenames are not lowercase, please change them before running `assets.sync`:'
+        print 'The following filenames are not lowercase, ' + \
+            'please change them before running `assets.sync`:'
 
         for name in not_lowercase:
             print '    %s' % name
@@ -143,6 +145,7 @@ def sync(slug):
         elif action == 'delete':
             _assets_delete(local_path, key)
 
+
 @task
 def rm(path):
     """
@@ -159,7 +162,8 @@ def rm(path):
 
     found_folder = True
 
-    # Add files in folders, instead of folders themselves (S3 doesn't have folders)
+    # Add files in folders, instead of folders themselves
+    # (S3 doesn't have folders)
     while found_folder:
         found_folder = False
 
@@ -173,7 +177,8 @@ def rm(path):
                     file_list.append(os.path.join(local_path, path))
 
     if len(file_list) > 0:
-        utils.confirm("You are about to destroy %i files. Are you sure?" % len(file_list))
+        utils.confirm("You are about to destroy %i files. Are you sure?" % len(
+            file_list))
 
         for local_path in file_list:
             print local_path
@@ -189,18 +194,22 @@ def rm(path):
 
             _assets_delete(local_path, key)
 
+
 def _assets_get_bucket():
     """
     Get a reference to the assets bucket.
     """
     return utils.get_bucket(app_config.ASSETS_S3_BUCKET['bucket_name'])
 
+
 def _assets_confirm(local_path):
     """
     Check with user about whether to keep local or remote file.
     """
     print '--> This file has been changed locally and on S3.'
-    answer = prompt('Take remote [r] Take local [l] Take all remote [ra] Take all local [la] cancel', default='c')
+    answer = prompt(
+        'Take remote [r] Take local [l] Take all remote ' +
+        '[ra] Take all local [la] cancel', default='c')
 
     if answer == 'r':
         return ('remote', False)
@@ -213,9 +222,12 @@ def _assets_confirm(local_path):
 
     return (None, False)
 
+
 def _assets_upload_confirm():
     print '--> This file does not exist on S3.'
-    answer = prompt('Upload local copy [u] Delete local copy [d] Upload all [ua] Delete all [da] cancel', default='c')
+    answer = prompt(
+        'Upload local copy [u] Delete local copy [d] Upload all [ua] ' +
+        'Delete all [da] cancel', default='c')
 
     if answer == 'u':
         return ('upload', False)
@@ -227,6 +239,7 @@ def _assets_upload_confirm():
         return ('delete', True)
 
     return (None, False)
+
 
 def _assets_download(s3_key, local_path):
     """
@@ -241,6 +254,7 @@ def _assets_download(s3_key, local_path):
 
     s3_key.get_contents_to_filename(local_path)
 
+
 def _assets_upload(local_path, s3_key):
     """
     Utility method to upload a single asset to S3.
@@ -252,6 +266,7 @@ def _assets_upload(local_path, s3_key):
 
     s3_key.set_metadata('md5', local_md5)
     s3_key.set_contents_from_filename(local_path)
+
 
 def _assets_delete(local_path, s3_key):
     """

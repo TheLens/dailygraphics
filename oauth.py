@@ -10,9 +10,11 @@ from flask import Blueprint, make_response, redirect, render_template, url_for
 from functools import wraps
 from render_utils import load_graphic_config, make_context
 
-SPREADSHEET_URL_TEMPLATE = 'https://docs.google.com/feeds/download/spreadsheets/Export?exportFormat=xlsx&key=%s'
+SPREADSHEET_URL_TEMPLATE = 'https://docs.google.com/feeds/download/' + \
+    'spreadsheets/Export?exportFormat=xlsx&key=%s'
 
 oauth = Blueprint('_oauth', __name__)
+
 
 @oauth.route('/oauth/')
 def oauth_alert():
@@ -26,11 +28,14 @@ def oauth_alert():
 
     credentials = get_credentials()
     if credentials:
-        resp = authomatic.access(credentials, 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
+        resp = authomatic.access(
+            credentials,
+            'https://www.googleapis.com/oauth2/v1/userinfo?alt=json')
         if resp.status == 200:
             context['email'] = resp.data['email']
 
     return render_template('oauth/oauth.html', **context)
+
 
 @oauth.route('/authenticate/', methods=['GET', 'POST'])
 def authenticate():
@@ -57,6 +62,7 @@ def authenticate():
 
     return response
 
+
 def oauth_required(f):
     """
     Decorator to ensure oauth workflow has happened.
@@ -76,11 +82,17 @@ def oauth_required(f):
 
             credentials = get_credentials()
 
-            if hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') and graphic_config.COPY_GOOGLE_DOC_KEY and (not credentials or not credentials.valid):
+            condition = (
+                hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') and
+                graphic_config.COPY_GOOGLE_DOC_KEY and
+                (not credentials or not credentials.valid)
+            )
+            if condition:
                 return redirect(url_for('_oauth.oauth_alert'))
 
         return f(*args, **kwargs)
     return decorated_function
+
 
 def get_credentials():
     """
@@ -102,6 +114,7 @@ def get_credentials():
 
     return credentials
 
+
 def save_credentials(credentials):
     """
     Take Authomatic credentials object and save to disk.
@@ -109,6 +122,7 @@ def save_credentials(credentials):
     file_path = os.path.expanduser(app_config.GOOGLE_OAUTH_CREDENTIALS_PATH)
     with open(file_path, 'w') as f:
         f.write(credentials.serialize())
+
 
 def get_document(key, file_path):
     """
@@ -120,12 +134,15 @@ def get_document(key, file_path):
 
     if response.status != 200:
         if response.status == 404:
-            raise KeyError("Error! Your Google Doc does not exist or you do not have permission to access it.")
+            raise KeyError(
+                "Error! Your Google Doc does not exist or you do not have " +
+                "permission to access it.")
         else:
-            raise KeyError("Error! Google returned a %s error" % response.status)
+            raise KeyError("Error! Google returned error %s." % response.status)
 
     with open(file_path, 'wb') as writefile:
         writefile.write(response.content)
+
 
 def _has_api_credentials():
     """

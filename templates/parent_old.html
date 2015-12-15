@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Graphic Embed : NPR</title>
+    <title>Graphic Embed : The Lens</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
     <style>
         textarea {
@@ -44,8 +44,8 @@ $(function() {
         var require_{{ var_name }} = requirejs.config({
             context: '{{ slug }}',
             paths: {
-                'pym': 'http://apps.npr.org/dailygraphics/graphics/{{ slug }}/js/lib/parent',
-                'jquery': 'http://apps.npr.org/dailygraphics/graphics/{{ slug }}/js/lib/jquery'
+                'pym': 'http://projects.thelensnola.org/dailygraphics/graphics/{{ slug }}/js/lib/parent',
+                'jquery': 'http://projects.thelensnola.org/dailygraphics/graphics/{{ slug }}/js/lib/jquery'
             }
         });
 
@@ -76,7 +76,7 @@ $(function() {
 
                     // Initalize pym
     	            $('#responsive-embed-{{ slug }}').responsiveIframe({
-    	                src: 'http://apps.npr.org/dailygraphics/graphics/{{ slug }}/child.html'
+    	                src: 'http://projects.thelensnola.org/dailygraphics/graphics/{{ slug }}/child.html'
     	            });
 
                     // Reattach original window event binding method
@@ -102,12 +102,12 @@ $(function() {
     // Require.js is not on the page, but jQuery is (old Seamus)
     } else if (typeof $ !== 'undefined' && typeof $.getScript === 'function') {
         // Load pym
-        $.getScript('http://apps.npr.org/dailygraphics/graphics/{{ slug }}/js/lib/parent.js').done(function () {
+        $.getScript('http://projects.thelensnola.org/dailygraphics/graphics/{{ slug }}/js/lib/parent.js').done(function () {
             // Wait for page to load
             $(function() {
                 // Initialize pym
                 $('#responsive-embed-{{ slug }}').responsiveIframe({
-                    src: 'http://apps.npr.org/dailygraphics/graphics/{{ slug }}/child.html'
+                    src: 'http://projects.thelensnola.org/dailygraphics/graphics/{{ slug }}/child.html'
                 });
             });
         });

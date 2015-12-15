@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Graphic Embed : NPR</title>
+    <title>Graphic Embed : The Lens</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <script type="text/javascript" src="//use.typekit.net/oct0mkd.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
     <style type="text/css">
         body {
-            font: 14px/1.4 Helvetica, Arial, sans-serif;
+            font: 14px/1.4 "news-gothic-std", Helvetica, Arial, sans-serif;
             color: #333;
         }
 
         h1 {
             font-size: 20px;
+            font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
             margin: 0;
         }
         h2 {
             font-size: 14px;
+            font-family: "minion-pro", Georgia, "Times New Roman", Times, serif;
             margin: 0 0 11px 0;
         }
 
@@ -62,22 +68,59 @@
             text-decoration: none;
         }
         a:hover, a:active { color: #bccae5; }
+
+        /* Table of contents image border */
+        .index-item {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+            border: 1px solid black;
+            vertical-align: top;
+            border: 1px solid #c3c3c3;
+            padding: 5px;
+            margin: 5px;
+            overflow: hidden;
+        }
+        .index-graphic-title {
+        }
+        .toc-images {
+          border: 1px solid #c3c3c3;
+        }
+
     </style>
 </head>
 <body>
 
 <!-- index -->
-<h1>There are <strong>{{ graphics_count }}</strong> graphics:</h1>
 
-<ol class="graphics-list">{% for graphic in graphics %}
-    <li><a href="/graphics/{{ graphic }}/?refresh=1">{{ graphic }}</a></li>
-{% endfor %}</ol>
+<!-- <h1>There are <strong>{{ templates_count }}</strong> templates to choose from.</h1> -->
+<h1>Template graphics</h1>
+{% for template in templates %}
+  <a class="index-graphic-title" href="templates/{{ template }}/?refresh=1">
+    <div class="index-item">
+      {{ template }}
+      <div>
+        <img class="toc-images" src="templates/{{ template }}/fallback.png" alt="{{ template }}" style="max-width: 150px; max-height: 150px;" width="150" />
+      </div>
+    </div>
+  </a>
+{% endfor %}
 
-<h1>There are <strong>{{ templates_count }}</strong> templates:</h1>
-
-<ol class="templates-list">{% for template in templates %}
-    <li><a href="/templates/{{ template }}/?refresh=1">{{ template }}</a></li>
-{% endfor %}</ol>
+<!-- <h1>There are <strong>{{ graphics_count }}</strong> graphics in the archives.</h1> -->
+<h1>Published graphics</h1>
+{% for graphic in graphics %}
+  <a class="index-graphic-title" href="graphics/{{ graphic }}/?refresh=1">
+    <div class="index-item">
+      {{ graphic }}
+      <div>
+        <img class="toc-images" src="graphics/{{ graphic }}/fallback.png" alt="{{ graphic }}" style="max-width: 150px; max-height: 150px;" width="150" />
+      </div>
+    </div>
+  </a>
+{% endfor %}
+{% if graphics_count == 0%}
+<div>No published graphics yet.</div>
+{% endif %}
 
 </body>
 </html>

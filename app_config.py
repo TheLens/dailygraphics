@@ -31,7 +31,8 @@ TEMPLATES_PATH = os.path.abspath('graphic_templates')
 """
 OAUTH
 
-Don't plan on using this for The Lens, but configuring anyway.
+Don't plan on using this for The Lens, but configuring anyway just in case.
+It uses 'The Lens dailygraphics' project on Google Developers Console.
 """
 
 GOOGLE_OAUTH_CREDENTIALS_PATH = '~/.google_oauth_credentials'
@@ -61,7 +62,7 @@ PRODUCTION_S3_BUCKET = {
 }
 
 STAGING_S3_BUCKET = {
-    'bucket_name': 'stage-projects.thelensnola.org',
+    'bucket_name': 'staging-projects.thelensnola.org',
     'region': 'us-east-1'
 }
 
@@ -77,8 +78,9 @@ ASSETS_MAX_AGE = 300
 ANALYTICS
 """
 
+# Main thelensnola.org domain
 GOOGLE_ANALYTICS = {
-    'ACCOUNT_ID': 'UA-66829612-1'  # The Lens
+    'ACCOUNT_ID': 'UA-13119155-1'
 }
 
 # These variables will be set at runtime. See configure_targets() below

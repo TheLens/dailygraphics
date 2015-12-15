@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import copy
 from cStringIO import StringIO
@@ -8,7 +7,6 @@ import hashlib
 import mimetypes
 import os
 
-import boto
 from boto.s3.key import Key
 
 import app_config
@@ -16,13 +14,16 @@ import utils
 
 GZIP_FILE_TYPES = ['.html', '.js', '.json', '.css', '.xml']
 
+
 class FakeTime:
     def time(self):
         return 1261130520.0
 
 # Hack to override gzip's time implementation
-# See: http://stackoverflow.com/questions/264224/setting-the-gzip-timestamp-from-python
+# See: http://stackoverflow.com/questions/264224/setting-the-gzip
+# -timestamp-from-python
 gzip.time = FakeTime()
+
 
 def deploy_file(src, dst, headers={}):
     """
@@ -64,7 +65,8 @@ def deploy_file(src, dst, headers={}):
             print 'Skipping %s (has not changed)' % src
         else:
             print 'Uploading %s --> %s (gzipped)' % (src, dst)
-            k.set_contents_from_string(output.getvalue(), file_headers, policy='public-read')
+            k.set_contents_from_string(
+                output.getvalue(), file_headers, policy='public-read')
     # Non-gzip file
     else:
         with open(src, 'rb') as f:
@@ -76,7 +78,9 @@ def deploy_file(src, dst, headers={}):
             print 'Skipping %s (has not changed)' % src
         else:
             print 'Uploading %s --> %s' % (src, dst)
-            k.set_contents_from_filename(src, file_headers, policy='public-read')
+            k.set_contents_from_filename(
+                src, file_headers, policy='public-read')
+
 
 def deploy_folder(src, dst, headers={}, ignore=[]):
     """
@@ -112,6 +116,7 @@ def deploy_folder(src, dst, headers={}, ignore=[]):
 
     for src, dst in to_deploy:
         deploy_file(src, dst, headers)
+
 
 def delete_folder(dst):
     """

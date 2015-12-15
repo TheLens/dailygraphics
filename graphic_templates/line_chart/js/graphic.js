@@ -49,7 +49,7 @@ var loadCSV = function(url) {
             renderCallback: render
         });
     });
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -64,7 +64,7 @@ var formatData = function() {
             }
         }
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.

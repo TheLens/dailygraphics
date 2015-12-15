@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 
 import base_filters
 
-COPY_GOOGLE_DOC_KEY = '1aL4G6EaWYIEpdP_QPgUrtQUClE6-TlRb6KQ-5nFTXZY'
+COPY_GOOGLE_DOC_KEY = '1meKv4-8vJQ-5-63Gg4mREXDwZwUnwrpyxoqmy_b0SJ8'
 
 USE_ASSETS = False
 

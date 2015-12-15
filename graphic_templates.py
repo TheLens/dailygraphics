@@ -1,12 +1,9 @@
-#!/usr/bin/env python
 
-import imp
 from mimetypes import guess_type
 import os
 import subprocess
-import sys
 
-from flask import Blueprint, abort, make_response, render_template, render_template_string
+from flask import Blueprint, abort, make_response, render_template
 from jinja2 import Environment, FileSystemLoader
 
 import app_config
@@ -15,6 +12,7 @@ import oauth
 from render_utils import load_graphic_config, make_context, render_with_context
 
 graphic_templates = Blueprint('graphic_templates', __name__)
+
 
 @graphic_templates.route('/<slug>/')
 @oauth.oauth_required
@@ -27,12 +25,15 @@ def _templates_detail(slug):
     template_path = '%s/%s' % (app_config.TEMPLATES_PATH, slug)
     base_template_path = '%s/%s' % (app_config.TEMPLATES_PATH, '_base')
 
-    # NOTE: Parent must load pym.js from same source as child to prevent version conflicts!
+    # NOTE: Parent must load pym.js from same source as child to prevent
+    # version conflicts!
     context = make_context(asset_depth=2, root_path=template_path)
     context['slug'] = slug
+    context['type'] = 'templates'
 
     try:
-        graphic_config = load_graphic_config(template_path, [base_template_path])
+        graphic_config = load_graphic_config(
+            template_path, [base_template_path])
         context.update(graphic_config.__dict__)
 
         if hasattr(graphic_config, 'COPY_GOOGLE_DOC_KEY') and graphic_config.COPY_GOOGLE_DOC_KEY:
@@ -45,7 +46,13 @@ def _templates_detail(slug):
     except IOError:
         pass
 
-    return make_response(render_template('parent.html', **context))
+    # Save for uploading to S3.
+    html = render_template('parent.html', **context)
+    with open('%s/index.html' % template_path, "w") as filename:
+        filename.write(html)
+
+    return make_response(html)
+
 
 @graphic_templates.route('/<slug>/child.html')
 @oauth.oauth_required
@@ -66,10 +73,14 @@ def _templates_child(slug):
     context = make_context(asset_depth=2, root_path=template_path)
     context['slug'] = slug
 
-    env = Environment(loader=FileSystemLoader([template_path, '%s/_base' % app_config.TEMPLATES_PATH]))
+    env = Environment(loader=FileSystemLoader([
+        template_path,
+        '%s/_base' % app_config.TEMPLATES_PATH])
+    )
 
     try:
-        graphic_config = load_graphic_config(template_path, [base_template_path])
+        graphic_config = load_graphic_config(
+            template_path, [base_template_path])
         context.update(graphic_config.__dict__)
 
         if hasattr(graphic_config, 'JINJA_FILTER_FUNCTIONS'):
@@ -86,7 +97,14 @@ def _templates_child(slug):
     env.globals.update(render=render_with_context)
     template = env.get_template('child_template.html')
 
+    # Save for uploading to S3.
+    html = template.render(**context)
+    with open('%s/child.html' % template_path, "w") as filename:
+        html = html.replace('.less', '.css')
+        filename.write(html)
+
     return make_response(template.render(**context))
+
 
 # Render graphic LESS files on-demand
 @graphic_templates.route('/<slug>/css/<filename>.less')
@@ -100,7 +118,8 @@ def _templates_less(slug, filename):
     temp_base_less_path = '%s/css/base.less' % template_path
 
     if not os.path.exists(less_path):
-        less_path = '%s/_base/css/%s.less' % (app_config.TEMPLATES_PATH, filename)
+        less_path = '%s/_base/css/%s.less' % (
+            app_config.TEMPLATES_PATH, filename)
 
         if not os.path.exists(less_path):
             abort(404)
@@ -116,7 +135,12 @@ def _templates_less(slug, filename):
     # Remove temporary symlink
     os.remove(temp_base_less_path)
 
-    return make_response(r, 200, { 'Content-Type': 'text/css' })
+    # Save .css for template
+    with open('%s/css/graphic.css' % template_path, "w") as filename:
+        filename.write(r)
+
+    return make_response(r, 200, {'Content-Type': 'text/css'})
+
 
 # Serve arbitrary static files from either graphic or base graphic paths
 @graphic_templates.route('/<slug>/<path:path>')
@@ -131,4 +155,4 @@ def _static(slug, path):
             abort(404)
 
     with open('%s' % real_path) as f:
-        return f.read(), 200, { 'Content-Type': guess_type(real_path)[0] }
+        return f.read(), 200, {'Content-Type': guess_type(real_path)[0]}

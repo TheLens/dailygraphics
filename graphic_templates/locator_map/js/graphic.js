@@ -4,24 +4,29 @@ var MOBILE_THRESHOLD = 500;
 var GEO_DATA_URL = 'data/geodata.json';
 
 var LABEL_DEFAULTS = {
+    // Don't change
     'text-anchor': 'start',
     'dx': '6',
     'dy': '4'
-}
+};
 
 var CITY_LABEL_ADJUSTMENTS = {
-    'Biratnagar': { 'dy': -3 },
-    'Birganj': { 'dy': -3 },
-    'Kathmandu': { 'text-anchor': 'end', 'dx': -4, 'dy': -4 },
-    'Nepalganj': { 'text-anchor': 'end', 'dx': -4, 'dy': 12 },
-    'Pokhara': { 'text-anchor': 'end', 'dx': -6 },
-    'Kanpur': { 'dy': 12 }
-}
+  'Baton Rouge': {'text-anchor': 'start', 'dx': 6,  'dy': 4},
+  'Biloxi':      {'text-anchor': 'start', 'dx': 6,  'dy': 4},
+  'Gulfport':    {'text-anchor': 'end',   'dx': -5, 'dy': 4},
+  'Houma':       {'text-anchor': 'start', 'dx': 6,  'dy': 4},
+  'Metairie':    {'text-anchor': 'end',   'dx': -5, 'dy': 4},
+  'New Orleans': {'text-anchor': 'start', 'dx': 6,  'dy': 4},
+  'Slidell':     {'text-anchor': 'start', 'dx': 6,  'dy': 4}
+};
 
 var COUNTRY_LABEL_ADJUSTMENTS = {
-    'Nepal': { 'text-anchor': 'end', 'dx': -50, 'dy': -20 },
-    'Bangladesh': { 'text-anchor': 'end', 'dx': -10 }
-}
+    'Country name': { 'text-anchor': 'end', 'dx': -50, 'dy': -20 }
+};
+
+var EXTERNAL_LABEL_ADJUSTMENTS = {
+  'Highlighted location': {'text-anchor': 'start', 'dx': 6, 'dy': 4}
+};
 
 // Global vars
 var pymChild = null;
@@ -33,24 +38,24 @@ var geoData = null;
  */
 var onWindowLoaded = function() {
     if (Modernizr.svg) {
-        loadJSON('data/geodata.json')
+        loadJSON('data/geodata.json');
     } else {
         pymChild = new pym.Child({});
     }
-}
+};
 
 /*
- * Load graphic data from a CSV.
+ * Load graphic data from a JSON.
  */
 var loadJSON = function(url) {
-    d3.json(url, function(error, data) {
-        geoData = data;
+  d3.json(url, function(error, data) {
+      geoData = data;
 
-        pymChild = new pym.Child({
-            renderCallback: render
-        });
-    });
-}
+      pymChild = new pym.Child({
+          renderCallback: render
+      });
+  });
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -71,14 +76,14 @@ var render = function(containerWidth) {
         container: '#graphic',
         width: containerWidth,
         data: geoData,
-        primaryCountry: 'Nepal'
+        primaryCountry: 'United States'
     });
 
     // Update iframe
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 var renderLocatorMap = function(config) {
     /*
@@ -88,7 +93,7 @@ var renderLocatorMap = function(config) {
     var aspectHeight = 1.2;
 
     var bbox = config['data']['bbox'];
-    var defaultScale = 3000;
+    var defaultScale = 12000;  // 3000;
     var cityDotRadius = 3;
 
     // Calculate actual map dimensions
@@ -138,7 +143,7 @@ var renderLocatorMap = function(config) {
     chartElement = chartWrapper.append('svg')
         .attr('width', mapWidth)
         .attr('height', mapHeight)
-        .append('g')
+        .append('g');
 
     /*
      * Create SVG filters.
@@ -183,7 +188,7 @@ var renderLocatorMap = function(config) {
             .attr('d', path);
 
     // Highlight primary country
-    var primaryCountryClass = classify(config['primaryCountry']);
+    primaryCountryClass = classify(config['primaryCountry']);
 
     d3.select('.countries path.' + primaryCountryClass)
         .moveToFront()
@@ -229,20 +234,39 @@ var renderLocatorMap = function(config) {
             });
 
     /*
-     * Render neighboring cities.
+     * Render neighboring countries' cities.
+     */
+    // chartElement.append('g')
+    //     .attr('class', 'cities neighbors')
+    //     .selectAll('path')
+    //         .data(mapData['neighbors']['features'])
+    //     .enter().append('path')
+    //         .attr('d', path)
+    //         .attr('class', function(d) {
+    //             var c = 'place';
+
+    //             c += ' ' + classify(d['properties']['city']);
+    //             c += ' ' + classify(d['properties']['featurecla']);
+    //             c += ' scalerank-' + d['properties']['scalerank'];
+
+    //             return c;
+    //         });
+
+    /*
+     * Render external data.
      */
     chartElement.append('g')
-        .attr('class', 'cities neighbors')
+        .attr('class', 'external') // cities, primary
         .selectAll('path')
-            .data(mapData['neighbors']['features'])
+            .data(mapData['external']['features'])
         .enter().append('path')
             .attr('d', path)
             .attr('class', function(d) {
                 var c = 'place';
 
-                c += ' ' + classify(d['properties']['city']);
-                c += ' ' + classify(d['properties']['featurecla']);
-                c += ' scalerank-' + d['properties']['scalerank'];
+                c += ' ' + classify(d['properties']['location']);
+                // c += ' ' + classify(d['properties']['featurecla']);
+                // c += ' scalerank-' + d['properties']['scalerank'];
 
                 return c;
             });
@@ -260,7 +284,7 @@ var renderLocatorMap = function(config) {
         } else {
             return LABEL_DEFAULTS[attribute];
         }
-    }
+    };
 
     /*
      * Render country labels.
@@ -308,11 +332,12 @@ var renderLocatorMap = function(config) {
     layers.forEach(function(layer) {
         var data = [];
 
-        if (layer == 'city-labels shadow' || layer == 'city-labels') {
-            data = mapData['neighbors']['features'];
-        } else {
-            data = mapData['cities']['features'];
-        }
+        // if (layer == 'city-labels shadow' || layer == 'city-labels') {
+        //     data = mapData['neighbors']['features'];
+        // } else {
+        //     data = mapData['cities']['features'];
+        // }
+        data = mapData['cities']['features'];
 
         chartElement.append('g')
             .attr('class', layer)
@@ -345,6 +370,58 @@ var renderLocatorMap = function(config) {
                 });
     });
 
+    /*
+     * Render external data's labels.
+     */
+    var externalLayers = [
+        'external-labels shadow',
+        'external-labels',
+        'external-labels shadow primary',
+        'external-labels primary'
+    ];
+
+    externalLayers.forEach(function(layer) {
+        var data = [];
+
+        // if (layer == 'external-labels shadow' || layer == 'external-labels') {
+        //     data = mapData['neighbors']['features'];
+        // } else {
+        //     data = mapData['external']['features'];
+        // }
+        data = mapData['external']['features'];
+
+        chartElement.append('g')
+            .attr('class', layer)
+            .selectAll('.label')
+                .data(data)
+            .enter().append('text')
+                .attr('class', function(d) {
+                    var c = 'label';
+
+                    c += ' ' + classify(d['properties']['location']);
+                    // c += ' ' + classify(d['properties']['featurecla']);
+                    // c += ' scalerank-' + d['properties']['scalerank'];
+
+                    return c;
+                })
+                .attr('transform', function(d) {
+                    return 'translate(' + projection(d['geometry']['coordinates']) + ')';
+                })
+                .attr('style', function(d) {
+                    return 'text-anchor: ' + positionLabel(EXTERNAL_LABEL_ADJUSTMENTS, d['properties']['location'], 'text-anchor');
+                })
+                .attr('dx', function(d) {
+                    return positionLabel(EXTERNAL_LABEL_ADJUSTMENTS, d['properties']['location'], 'dx');
+                })
+                .attr('dy', function(d) {
+                    return positionLabel(EXTERNAL_LABEL_ADJUSTMENTS, d['properties']['location'], 'dy');
+                })
+                .text(function(d) {
+                    // TODO: What is CITIES variable?
+                    return CITIES[d['properties']['location']] || d['properties']['location'];
+                });
+    });
+
     d3.selectAll('.shadow')
         .attr('filter', 'url(#textshadow)');
 
@@ -368,7 +445,7 @@ var renderLocatorMap = function(config) {
         .attr('x', scaleBarEnd[0] + 5)
         .attr('y', scaleBarEnd[1] + 3)
         .text(scaleBarDistance + ' miles');
-}
+};
 
 /*
  * Move a set of D3 elements to the front of the canvas.

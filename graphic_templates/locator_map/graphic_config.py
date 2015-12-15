@@ -2,7 +2,7 @@
 
 import base_filters
 
-COPY_GOOGLE_DOC_KEY = '1FwRh41h458JmMsT6sv7_kLrV_G_jtVdwoUw6tPJ4-90'
+COPY_GOOGLE_DOC_KEY = '1GCnfLogo6837o3kkYRw0quGz-nEahd3rNxcDhh-BUtE'
 
 USE_ASSETS = False
 
