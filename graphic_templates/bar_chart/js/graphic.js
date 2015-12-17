@@ -1,57 +1,27 @@
-// Global config
-var GRAPHIC_DEFAULT_WIDTH = 600;
-var MOBILE_THRESHOLD = 500;
-
 // Global vars
 var pymChild = null;
 var isMobile = false;
-var graphicData = null;
 
 /*
  * Initialize the graphic.
  */
 var onWindowLoaded = function() {
     if (Modernizr.svg) {
-        loadLocalData(GRAPHIC_DATA);
-        //loadCSV('data.csv')
+        formatData();
+
+        pymChild = new pym.Child({
+            renderCallback: render
+        });
     } else {
         pymChild = new pym.Child({});
     }
 }
 
 /*
- * Load graphic data from a local source.
- */
-var loadLocalData = function(data) {
-    graphicData = data;
-
-    formatData();
-
-    pymChild = new pym.Child({
-        renderCallback: render
-    });
-}
-
-/*
- * Load graphic data from a CSV.
- */
-var loadCSV = function(url) {
-    d3.csv(GRAPHIC_DATA_URL, function(error, data) {
-        graphicData = data;
-
-        formatData();
-
-        pymChild = new pym.Child({
-            renderCallback: render
-        });
-    });
-}
-
-/*
- * Format graphic data for processing by D3.
+ * Format data for D3.
  */
 var formatData = function() {
-    graphicData.forEach(function(d) {
+    DATA.forEach(function(d) {
         d['amt'] = +d['amt'];
     });
 }
@@ -61,7 +31,7 @@ var formatData = function() {
  */
 var render = function(containerWidth) {
     if (!containerWidth) {
-        containerWidth = GRAPHIC_DEFAULT_WIDTH;
+        containerWidth = DEFAULT_WIDTH;
     }
 
     if (containerWidth <= MOBILE_THRESHOLD) {
@@ -72,9 +42,9 @@ var render = function(containerWidth) {
 
     // Render the chart!
     renderBarChart({
-        container: '#graphic',
+        container: '#bar-chart',
         width: containerWidth,
-        data: graphicData
+        data: DATA
     });
 
     // Update iframe
@@ -140,13 +110,12 @@ var renderBarChart = function(config) {
         min = 0;
     }
 
+    var max = d3.max(config['data'], function(d) {
+        return Math.ceil(d[valueColumn] / roundTicksFactor) * roundTicksFactor;
+    })
+
     var xScale = d3.scale.linear()
-        .domain([
-            min,
-            d3.max(config['data'], function(d) {
-                return Math.ceil(d[valueColumn] / roundTicksFactor) * roundTicksFactor;
-            })
-        ])
+        .domain([min, max])
         .range([0, chartWidth]);
 
     /*
@@ -213,12 +182,14 @@ var renderBarChart = function(config) {
     /*
      * Render 0-line.
      */
-    chartElement.append('line')
-        .attr('class', 'zero-line')
-        .attr('x1', xScale(0))
-        .attr('x2', xScale(0))
-        .attr('y1', 0)
-        .attr('y2', chartHeight);
+    if (min < 0) {
+        chartElement.append('line')
+            .attr('class', 'zero-line')
+            .attr('x1', xScale(0))
+            .attr('x2', xScale(0))
+            .attr('y1', 0)
+            .attr('y2', chartHeight);
+    }
 
     /*
      * Render bar labels.

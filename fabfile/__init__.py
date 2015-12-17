@@ -82,19 +82,23 @@ code to a remote server if required.
 
 
 @task
-def deploy(slug):
+def deploy(*slugs):
     """
-    Deploy the latest app to S3 and, if configured, to our servers.
+    Deploy the latest app(s) to S3 and, if configured, to our servers.
+    """
+    if slugs[0] == '':
+        print 'You must specify at least one slug, like this: "deploy:slug" or "deploy:slug,slug"'
+        return
+
+    for slug in slugs:
+        deploy_single(slug)
+
+
+def deploy_single(slug):
+    """
+    Deploy a single project to S3 and, if configured, to our servers.
     """
     require('settings', provided_by=[production, staging])
-
-    if not slug:
-        print 'You must specify a project slug, like this: "deploy:slug"'
-        return
-
-    if env.settings is None:  # Staging/production not set.
-        print 'You must select a target. Ex. fab staging deploy:slug.'
-        return
 
     graphic_root = '%s/%s' % (app_config.GRAPHICS_PATH, slug)
     s3_root = '%s/graphics/%s' % (app_config.PROJECT_SLUG, slug)
@@ -409,6 +413,20 @@ def add_graphic(slug):
 
 
 @task
+def add_animated_photo(slug):
+    """
+    Create a new animated photo (GIF alternative).
+    """
+    _add_graphic(slug, 'animated_photo')
+
+@task
+def add_archive_graphic(slug):
+    """
+    Create a shell to archive an old project.
+    """
+    _add_graphic(slug, 'archive_graphic')
+
+@task
 def add_bar_chart(slug):
     """
     Create a bar chart.
@@ -503,6 +521,12 @@ def add_table(slug):
     """
     _add_graphic(slug, 'table')
 
+@task
+def add_issue_matrix(slug):
+    """
+    Create a table comparing positions on an issue.
+    """
+    _add_graphic(slug, 'issue_matrix')
 
 def _check_credentials():
     """

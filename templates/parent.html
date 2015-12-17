@@ -2,137 +2,124 @@
 <html>
 
 <head>
-  <title>{% if DEPLOYMENT_TARGET %}{{ DEPLOYMENT_TARGET }} : {% endif %}{{ slug }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>{% if DEPLOYMENT_TARGET %}{{ DEPLOYMENT_TARGET }} : {% endif %}{{ slug }}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <style type="text/css">
+        /* Basic styles */
+        body {
+            font: 14px/1.4 Helvetica, Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
 
-  <!-- Fonts -->
-  <script type="text/javascript" src="//use.typekit.net/oct0mkd.js"></script>
-  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+        h1 {
+            font-size: 20px;
+            margin: 0;
+        }
 
-  <style type="text/css">
-  /* Basic styles */
+        h2 {
+            font-size: 14px;
+            margin: 0 0 11px 0;
+        }
 
-  body {
-    font: 14px/1.4 "news-gothic-std", Helvetica, Arial, sans-serif;
-    color: #333;
-    margin: 0;
-    padding: 0;
-  }
+        a, a:link,
+        a:visited {
+            color: #4774CC;
+            text-decoration: none;
+        }
+        a:hover,
+        a:active {
+            color: #bccae5;
+        }
 
-  h1 {
-    font-size: 20px;
-    font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
-    margin: 0;
-  }
+        a.btn {
+            font-size: 12px;
+            line-height: 28px;
+            margin: 0;
+            float: left;
+            padding: 0 11px;
+            border-radius: 4px;
+            background-color: #f7f7f7;
+            font-weight: bold;
+            -webkit-font-smoothing: antialiased;
+        }
+        a.btn:hover,
+        a.btn:active {
+            background-color: #fff;
+        }
 
-  h2 {
-    font-size: 14px;
-    font-family: "minion-pro", Georgia, "Times New Roman", Times, serif;
-    margin: 0 0 11px 0;
-  }
+        .graphics-list li {
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
 
-  a,
-  a:link,
-  a:visited {
-    color: #4774CC;
-    text-decoration: none;
-  }
+        /* Header */
+        .parent-header {
+            background-color: #ebebeb;
+            position: fixed;
+            top: 0px;
+            width: 100%;
+            height: 40px;
+            padding: 10px 5px 0 5px;
+            overflow: hidden;
+        }
+        .parent-header:after { clear: both; }
 
-  a:hover,
-  a:active {
-    color: #bccae5;
-  }
+        .parent-header .segment {
+            float: left;
+            padding-left: 5px;
+            padding-right: 5px;
+            white-space: nowrap;
+        }
 
-  a.btn {
-    font-size: 12px;
-    line-height: 28px;
-    margin: 0;
-    float: left;
-    padding: 0 11px;
-    border-radius: 4px;
-    background-color: #f7f7f7;
-    font-weight: bold;
-    -webkit-font-smoothing: antialiased;
-  }
+        .parent-header .right {
+            float: right;
+            margin-right: 15px;
+        }
 
-  a.btn:hover,
-  a.btn:active {
-    background-color: #fff;
-  }
+        .localhost,
+        a.localhost,
+        a.localhost:visited {
+            color: green;
+        }
 
-  .graphics-list li {
-    margin-top: 0;
-    margin-bottom: 6px;
-  }
-  /* Header */
+        .staging,
+        a.staging,
+        a.staging:visited {
+            color: orange;
+        }
 
-  .parent-header {
-    background-color: #ebebeb;
-    position: fixed;
-    top: 0px;
-    width: 100%;
-    height: 40px;
-    padding: 10px 5px 0 5px;
-    overflow: hidden;
-  }
+        .production,
+        a.production,
+        a.production:visited {
+            color: red;
+        }
 
-  .parent-header:after {
-    clear: both;
-  }
+        .resize {
+            background-color: white;
+        }
 
-  .parent-header .segment {
-    float: left;
-    padding-left: 5px;
-    padding-right: 5px;
-    white-space: nowrap;
-  }
+        /* Content */
+        .content {
+            margin: 60px 10px 10px 10px;
+        }
 
-  .parent-header .right {
-    float: right;
-    margin-right: 15px;
-  }
+        #preview-wrapper {
+            border: 2px dashed #ddd;
+            margin-bottom: 20px;
+        }
 
-  .localhost,
-  a.localhost,
-  a.localhost:visited {
-    color: green;
-  }
+        #preview {
+            width: 100%;
+        }
 
-  .staging,
-  a.staging,
-  a.staging:visited {
-    color: orange;
-  }
-
-  .production,
-  a.production,
-  a.production:visited {
-    color: red;
-  }
-
-  .resize {
-    background-color: white;
-  }
-  /* Content */
-
-  .content {
-    margin: 60px 10px 10px 10px;
-  }
-
-  #preview-wrapper {
-    border: 2px dashed #ddd;
-    margin-bottom: 20px;
-  }
-
-  #preview {
-    width: 100%;
-  }
-
-  textarea {
-    display: block;
-    margin-bottom: 20px;
-  }
-  </style>
+        textarea {
+            display: block;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
