@@ -16,7 +16,7 @@ var onWindowLoaded = function() {
     } else {
         pymChild = new pym.Child({});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -26,12 +26,11 @@ var formatData = function() {
         d['date'] = d3.time.format('%m/%d/%y').parse(d['date']);
 
         for (var key in d) {
-            if (key != 'date' && d[key] != null && d[key].length > 0) {
+            if (key !== 'date' && d[key] != null && d[key].length > 0) {
                 d[key] = +d[key];
             }
         }
     });
-};
 
     /*
      * Restructure tabular data for easier charting.
@@ -54,7 +53,7 @@ var formatData = function() {
             })
         });
     }
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -81,7 +80,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a line chart.
@@ -129,12 +128,12 @@ var renderLineChart = function(config) {
         .domain(d3.extent(config['data'][0]['values'], function(d) {
             return d['date'];
         }))
-        .range([ 0, chartWidth ])
+        .range([ 0, chartWidth ]);
 
     var min = d3.min(config['data'], function(d) {
         return d3.min(d['values'], function(v) {
             return Math.floor(v[valueColumn] / roundTicksFactor) * roundTicksFactor;
-        })
+        });
     });
 
     if (min > 0) {
@@ -144,7 +143,7 @@ var renderLineChart = function(config) {
     var max = d3.max(config['data'], function(d) {
         return d3.max(d['values'], function(v) {
             return Math.ceil(v[valueColumn] / roundTicksFactor) * roundTicksFactor;
-        })
+        });
     });
 
     var yScale = d3.scale.linear()
@@ -226,11 +225,11 @@ var renderLineChart = function(config) {
      */
     var xAxisGrid = function() {
         return xAxis;
-    }
+    };
 
     var yAxisGrid = function() {
         return yAxis;
-    }
+    };
 
     chartElement.append('g')
         .attr('class', 'x grid')
@@ -302,7 +301,7 @@ var renderLineChart = function(config) {
 
                 return label;
             });
-}
+};
 
 /*
  * Initially load the graphic

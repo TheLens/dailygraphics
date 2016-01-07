@@ -70,7 +70,7 @@ def app(port='8000'):
     """
     local(
         'gunicorn -b 0.0.0.0:%s ' % port +
-        '--timeout 3600 --debug --reload app:wsgi_app')
+        '--timeout 3600 --reload app:wsgi_app')  # --debug
 
 """
 Deployment
@@ -87,7 +87,8 @@ def deploy(*slugs):
     Deploy the latest app(s) to S3 and, if configured, to our servers.
     """
     if slugs[0] == '':
-        print 'You must specify at least one slug, like this: "deploy:slug" or "deploy:slug,slug"'
+        print 'You must specify at least one slug, like this: "deploy:slug"' + \
+            ' or "deploy:slug,slug"'
         return
 
     for slug in slugs:
@@ -419,12 +420,14 @@ def add_animated_photo(slug):
     """
     _add_graphic(slug, 'animated_photo')
 
+
 @task
 def add_archive_graphic(slug):
     """
     Create a shell to archive an old project.
     """
     _add_graphic(slug, 'archive_graphic')
+
 
 @task
 def add_bar_chart(slug):
@@ -521,12 +524,14 @@ def add_table(slug):
     """
     _add_graphic(slug, 'table')
 
+
 @task
 def add_issue_matrix(slug):
     """
     Create a table comparing positions on an issue.
     """
     _add_graphic(slug, 'issue_matrix')
+
 
 def _check_credentials():
     """

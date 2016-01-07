@@ -7,7 +7,6 @@ Changes for The Lens:
 
 * Automatically take a screenshot of the graphic and save as fallback.png when using `fab render`. This relies on Selenium, PhantomJS and Pillow.
 * Stores template and graphics spreadsheets in separate directories on Google Drive.
-* Stores `graphics` directory inside of the `dailygraphics` directory.
 * For maps, store external data in additional Google Sheets tabs, instead of storing that data as a local file. Each tab's name defines the object name. This allows editors and reporters access to the files.
 
 --------------------------------

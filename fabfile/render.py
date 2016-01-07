@@ -20,7 +20,7 @@ def render(slug=''):
     """
     if slug:
         _render_graphics(['%s/%s' % (app_config.GRAPHICS_PATH, slug)])
-        save_fallback_image(slug)
+        # save_fallback_image(slug)  # TODO
     else:
         _render_graphics(glob('%s/*' % app_config.GRAPHICS_PATH))
 
