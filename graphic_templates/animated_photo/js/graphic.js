@@ -8,9 +8,10 @@ var BREAKPOINTS = [ 375, 600, 1000 ];
  */
 var onWindowLoaded = function() {
      pymChild = new pym.Child({
-         renderCallback: render
+         renderCallback: render,
+         polling: 1000
      });
-}
+};
 
 /*
  * Render the graphic.
@@ -53,7 +54,7 @@ var render = function(containerWidth) {
 
         }
     });
-}
+};
 
 
 /*

@@ -10,12 +10,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -24,7 +25,7 @@ var formatData = function() {
     DATA.forEach(function(d) {
         d['amt'] = +d['amt'];
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -51,7 +52,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a column chart.
@@ -101,7 +102,7 @@ var renderColumnChart = function(config) {
      * Create D3 scale objects.
      */
     var xScale = d3.scale.ordinal()
-        .rangeRoundBands([0, chartWidth], .1)
+        .rangeRoundBands([0, chartWidth], 0.1)
         .domain(config['data'].map(function (d) {
             return d[labelColumn];
         }));
@@ -150,7 +151,7 @@ var renderColumnChart = function(config) {
 
     chartElement.append('g')
         .attr('class', 'y axis')
-        .call(yAxis)
+        .call(yAxis);
 
     /*
      * Render grid to chart.
@@ -238,23 +239,23 @@ var renderColumnChart = function(config) {
                         d3.select(this).classed('in', true);
                         return -(textHeight - valueGap / 2);
                     } else {
-                        d3.select(this).classed('out', true)
+                        d3.select(this).classed('out', true);
                         return textHeight + valueGap;
                     }
                 } else {
                     barHeight = yScale(0) - yScale(d[valueColumn]);
 
                     if (textHeight + valueGap * 2 < barHeight) {
-                        d3.select(this).classed('in', true)
+                        d3.select(this).classed('in', true);
                         return textHeight + valueGap;
                     } else {
-                        d3.select(this).classed('out', true)
+                        d3.select(this).classed('out', true);
                         return -(textHeight - valueGap / 2);
                     }
                 }
             })
-            .attr('text-anchor', 'middle')
-}
+            .attr('text-anchor', 'middle');
+};
 
 /*
  * Initially load the graphic

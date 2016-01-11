@@ -10,12 +10,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format data for D3.
@@ -24,7 +25,7 @@ var formatData = function() {
     DATA.forEach(function(d) {
         d['amt'] = +d['amt'];
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -51,7 +52,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a bar chart.
@@ -112,7 +113,7 @@ var renderBarChart = function(config) {
 
     var max = d3.max(config['data'], function(d) {
         return Math.ceil(d[valueColumn] / roundTicksFactor) * roundTicksFactor;
-    })
+    });
 
     var xScale = d3.scale.linear()
         .domain([min, max])
@@ -241,32 +242,32 @@ var renderBarChart = function(config) {
             })
             .attr('dx', function(d) {
                 var xStart = xScale(d[valueColumn]);
-                var textWidth = this.getComputedTextLength()
+                var textWidth = this.getComputedTextLength();
 
                 // Negative case
                 if (d[valueColumn] < 0) {
                     var outsideOffset = -(valueGap + textWidth);
 
                     if (xStart + outsideOffset < 0) {
-                        d3.select(this).classed('in', true)
+                        d3.select(this).classed('in', true);
                         return valueGap;
                     } else {
-                        d3.select(this).classed('out', true)
+                        d3.select(this).classed('out', true);
                         return outsideOffset;
                     }
                 // Positive case
                 } else {
                     if (xStart + valueGap + textWidth > chartWidth) {
-                        d3.select(this).classed('in', true)
+                        d3.select(this).classed('in', true);
                         return -(valueGap + textWidth);
                     } else {
-                        d3.select(this).classed('out', true)
+                        d3.select(this).classed('out', true);
                         return valueGap;
                     }
                 }
             })
-            .attr('dy', (barHeight / 2) + 3)
-}
+            .attr('dy', (barHeight / 2) + 3);
+};
 
 /*
  * Initially load the graphic

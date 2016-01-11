@@ -11,10 +11,11 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
 };
 

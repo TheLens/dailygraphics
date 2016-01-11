@@ -6,15 +6,8 @@ var isMobile = false;
  * Initialize the graphic.
  */
 var onWindowLoaded = function() {
-    pymChild = new pym.Child({});
-
-    // Update iframe
-    /*
-    if (pymChild) {
-        pymChild.sendHeight();
-    }
-    */
-}
+    pymChild = new pym.Child({polling: 1000});
+};
 
 /*
  * Initially load the graphic

@@ -10,12 +10,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -40,12 +41,12 @@ var formatData = function() {
                 'x0': x0,
                 'x1': x1,
                 'val': d[key]
-            })
+            });
 
             x0 = x1;
         }
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -72,7 +73,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a stacked bar chart.
@@ -271,7 +272,7 @@ var renderStackedBarChart = function(config) {
 
                 // Hide labels that don't fit
                 if (textWidth + valueGap * 2 > barWidth) {
-                    d3.select(this).classed('hidden', true)
+                    d3.select(this).classed('hidden', true);
                 }
 
                 if (d['x1'] < 0) {
@@ -280,7 +281,7 @@ var renderStackedBarChart = function(config) {
 
                 return -(valueGap + textWidth);
             })
-            .attr('dy', (barHeight / 2) + 4)
+            .attr('dy', (barHeight / 2) + 4);
 
     /*
      * Render 0-line.
@@ -323,7 +324,7 @@ var renderStackedBarChart = function(config) {
                 .text(function(d) {
                     return d[labelColumn];
                 });
-}
+};
 
 /*
  * Initially load the graphic

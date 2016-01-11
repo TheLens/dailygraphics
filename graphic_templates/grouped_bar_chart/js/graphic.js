@@ -10,12 +10,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -36,7 +37,7 @@ var formatData = function() {
 
         delete d['Group'];
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -63,7 +64,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a bar chart.
@@ -81,7 +82,7 @@ var renderGroupedBarChart = function(config) {
     var barHeight = 25;
     var barGapInner = 2;
     var barGap = 10;
-    var groupHeight =  (barHeight * numGroupBars) + (barGapInner * (numGroupBars - 1))
+    var groupHeight =  (barHeight * numGroupBars) + (barGapInner * (numGroupBars - 1));
     var labelWidth = 85;
     var labelMargin = 6;
     var valueGap = 6;
@@ -242,10 +243,10 @@ var renderGroupedBarChart = function(config) {
             })
             .attr('height', barHeight)
             .style('fill', function(d) {
-            	return colorScale(d[labelColumn]);
+              return colorScale(d[labelColumn]);
             })
             .attr('class', function(d) {
-                return 'y-' + d[labelColumn];
+              return 'y-' + d[labelColumn];
             });
 
     /*
@@ -293,7 +294,7 @@ var renderGroupedBarChart = function(config) {
             })
             .append('span')
                 .text(function(d) {
-                    return d['key']
+                    return d['key'];
                 });
 
     /*
@@ -328,32 +329,32 @@ var renderGroupedBarChart = function(config) {
             })
             .attr('dx', function(d) {
                 var xStart = xScale(d[valueColumn]);
-                var textWidth = this.getComputedTextLength()
+                var textWidth = this.getComputedTextLength();
 
                 // Negative case
                 if (d[valueColumn] < 0) {
                     var outsideOffset = -(valueGap + textWidth);
 
                     if (xStart + outsideOffset < 0) {
-                        d3.select(this).classed('in', true)
+                        d3.select(this).classed('in', true);
                         return valueGap;
                     } else {
-                        d3.select(this).classed('out', true)
+                        d3.select(this).classed('out', true);
                         return outsideOffset;
                     }
                 // Positive case
                 } else {
                     if (xStart + valueGap + textWidth > chartWidth) {
-                        d3.select(this).classed('in', true)
+                        d3.select(this).classed('in', true);
                         return -(valueGap + textWidth);
                     } else {
-                        d3.select(this).classed('out', true)
+                        d3.select(this).classed('out', true);
                         return valueGap;
                     }
                 }
             })
             .attr('dy', (barHeight / 2) + 4);
-}
+};
 
 
 /*

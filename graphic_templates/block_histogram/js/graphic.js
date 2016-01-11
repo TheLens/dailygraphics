@@ -15,12 +15,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -47,7 +48,7 @@ var formatData = function() {
             }
         }
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -76,7 +77,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a bar chart.
@@ -193,11 +194,11 @@ var renderBlockHistogram = function(config) {
             var el = d3.select(this);
             var transform = d3.transform(el.attr('transform'));
 
-            transform.translate[0] = transform.translate[0] - (xScale.rangeBand() / 2) - ((xScale.rangeBand() * .1) / 2);
+            transform.translate[0] = transform.translate[0] - (xScale.rangeBand() / 2) - ((xScale.rangeBand() * 0.1) / 2);
             transform.translate[1] = 3;
 
             return transform.toString();
-        })
+        });
 
     var lastTick = chartElement.select('.x.axis')
         .append('g')
@@ -206,17 +207,17 @@ var renderBlockHistogram = function(config) {
             var transform = d3.transform();
             var lastBin = xScale.domain()[xScale.domain().length - 1];
 
-            transform.translate[0] = xScale(lastBin) + xScale.rangeBand() + ((xScale.rangeBand() * .1) / 2);
+            transform.translate[0] = xScale(lastBin) + xScale.rangeBand() + ((xScale.rangeBand() * 0.1) / 2);
             transform.translate[1] = 3;
 
             return transform.toString();
-        })
+        });
 
     lastTick.append('line')
         .attr('x1', 0)
         .attr('x2', 0)
         .attr('y1', 0)
-        .attr('y2', 6)
+        .attr('y2', 6);
 
     lastTick.append('text')
         .attr('text-anchor', 'middle')
@@ -305,11 +306,11 @@ var renderBlockHistogram = function(config) {
 
     annotations.append('line')
         .attr('class', 'axis-0')
-        .attr('x1', xScale(0) - ((xScale.rangeBand() * .1) / 2))
+        .attr('x1', xScale(0) - ((xScale.rangeBand() * 0.1) / 2))
         .attr('y1', -margins['top'])
-        .attr('x2', xScale(0) - ((xScale.rangeBand() * .1) / 2))
+        .attr('x2', xScale(0) - ((xScale.rangeBand() * 0.1) / 2))
         .attr('y2', chartHeight);
-}
+};
 
 /*
  * Initially load the graphic

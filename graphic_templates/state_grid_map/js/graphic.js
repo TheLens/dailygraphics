@@ -11,12 +11,13 @@ var isMobile = false;
 var onWindowLoaded = function() {
     if (Modernizr.svg) {
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -43,7 +44,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 
 /*

@@ -10,12 +10,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -26,7 +27,7 @@ var formatData = function() {
         d['min'] = +d['min'];
         d['max'] = +d['max'];
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -53,7 +54,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a bar chart.
@@ -191,7 +192,7 @@ var renderDotChart = function(config) {
             .attr('cy', function(d, i) {
                 return i * (barHeight + barGap) + (barHeight / 2);
             })
-            .attr('r', dotRadius)
+            .attr('r', dotRadius);
 
     /*
      * Render bar labels.
@@ -243,7 +244,7 @@ var renderDotChart = function(config) {
                     return d[valueColumn].toFixed(1) + '%';
                 });
     });
-}
+};
 
 /*
  * Initially load the graphic

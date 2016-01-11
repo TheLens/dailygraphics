@@ -14,12 +14,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -29,7 +30,7 @@ var formatData = function() {
         d['start'] = +d['start'];
         d['end'] = +d['end'];
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -63,7 +64,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a line chart.
@@ -103,7 +104,7 @@ var renderSlopegraph = function(config) {
         margins['right'] = 105;
         labelGap = 32;
     } else if (isMobile) {
-        aspectWidth = 2.5
+        aspectWidth = 2.5;
         aspectHeight = 3;
         margins['right'] = 145;
     }
@@ -121,7 +122,7 @@ var renderSlopegraph = function(config) {
      */
     var xScale = d3.scale.ordinal()
         .domain([startLabel, endLabel])
-        .range([0, chartWidth])
+        .range([0, chartWidth]);
 
     var min = d3.min(config['data'], function(d) {
         var rowMin = d3.min([d[startColumn], d[endColumn]]);
@@ -205,7 +206,7 @@ var renderSlopegraph = function(config) {
                 return yScale(d[endColumn]);
             })
             .style('stroke', function(d) {
-                return colorScale(d[labelColumn])
+                return colorScale(d[labelColumn]);
             });
 
     /*
@@ -233,7 +234,7 @@ var renderSlopegraph = function(config) {
             })
             .attr('r', dotRadius)
             .style('fill', function(d) {
-                return colorScale(d[labelColumn])
+                return colorScale(d[labelColumn]);
             });
 
     chartElement.append('g')
@@ -251,7 +252,7 @@ var renderSlopegraph = function(config) {
             })
             .attr('r', dotRadius)
             .style('fill', function(d) {
-                return colorScale(d[labelColumn])
+                return colorScale(d[labelColumn]);
             });
 
     /*
@@ -332,7 +333,7 @@ var renderSlopegraph = function(config) {
                 return d[labelColumn];
             })
             .call(wrapText, (margins['right'] - labelGap), 16);
-}
+};
 
 /*
  * Wrap a block of text to a given width
@@ -381,7 +382,7 @@ var wrapText = function(texts, width, lineHeight) {
             }
         }
     });
-}
+};
 
 /*
  * Select an element and move it to the front of the stack

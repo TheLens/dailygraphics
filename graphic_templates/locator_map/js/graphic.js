@@ -38,7 +38,7 @@ var onWindowLoaded = function() {
     if (Modernizr.svg) {
         loadJSON();
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
 };
 
@@ -49,7 +49,8 @@ var loadJSON = function() {
     d3.json(GEO_DATA_URL, function(error, data) {
       geoData = data;
       pymChild = new pym.Child({
-          renderCallback: render
+          renderCallback: render,
+          polling: 1000
       });
   });
 };

@@ -10,12 +10,13 @@ var onWindowLoaded = function() {
         formatData();
 
         pymChild = new pym.Child({
-            renderCallback: render
+            renderCallback: render,
+            polling: 1000
         });
     } else {
-        pymChild = new pym.Child({});
+        pymChild = new pym.Child({polling: 1000});
     }
-}
+};
 
 /*
  * Format graphic data for processing by D3.
@@ -42,12 +43,12 @@ var formatData = function() {
                 'y0': y0,
                 'y1': y1,
                 'val': d[key]
-            })
+            });
 
             y0 = y1;
         }
     });
-}
+};
 
 /*
  * Render the graphic(s). Called by pym with the container width.
@@ -74,7 +75,7 @@ var render = function(containerWidth) {
     if (pymChild) {
         pymChild.sendHeight();
     }
-}
+};
 
 /*
  * Render a stacked column chart.
@@ -117,7 +118,7 @@ var renderStackedColumnChart = function(config) {
      */
     var xScale = d3.scale.ordinal()
         .domain(_.pluck(config['data'], labelColumn))
-        .rangeRoundBands([0, chartWidth], .1)
+        .rangeRoundBands([0, chartWidth], 0.1);
 
     var min = d3.min(config['data'], function(d) {
         return Math.floor(d['total'] / roundTicksFactor) * roundTicksFactor;
@@ -295,7 +296,7 @@ var renderStackedColumnChart = function(config) {
                 return barCenter + textHeight / 2;
             })
             .attr('text-anchor', 'middle');
-}
+};
 
 /*
  * Initially load the graphic
