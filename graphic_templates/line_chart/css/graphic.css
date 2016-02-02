@@ -1,9 +1,4 @@
-/*
- * Colors
- */
-/*
- * Base styles
- */
+/* base styles */
 html {
   -webkit-text-size-adjust: none;
 }
@@ -11,14 +6,14 @@ body {
   margin: 0;
   padding: 33px 0;
   font: 14px/1.4 "news-gothic-std", Helvetica, Arial, sans-serif;
-  color: #555;
+  color: #5a5a54;
   background-color: #FFF;
   /* For Selenium screenshot background (fallback.png). */
 }
 h1 {
   margin: 0 0 33px 0;
   font-size: 20px;
-  color: #666;
+  color: #000;
   font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
   font-weight: normal;
   line-height: 1.3;
@@ -28,22 +23,10 @@ h1 {
 h2 {
   font-weight: normal;
   font-family: "minion-pro", Georgia, "Times New Roman", Times, serif;
-  color: #777;
-  font-size: 12px;
+  color: #000;
+  font-size: 14px;
   margin: -22px 0 22px 0;
   line-height: 1.6;
-}
-h3 {
-  margin: 0 0 15px 0;
-  font-family: 'Knockout 31 4r';
-  font-weight: normal;
-  text-transform: uppercase;
-  padding-top: 0;
-  line-height: 1.2;
-  letter-spacing: 0.05em;
-  -webkit-font-smoothing: antialiased;
-  font-size: 12px;
-  color: #333;
 }
 .nowrap {
   white-space: nowrap;
@@ -53,15 +36,15 @@ h3 {
 }
 .footnotes h4 {
   margin: 2px 0 7px 0;
-  color: #666;
-  font-size: 11px;
+  color: #000;
+  font-size: 12px;
 }
 .footnotes p,
 .footer p {
   margin: 2px 0 0 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
-  color: #999;
+  color: #5a5a54;
 }
 .footer p {
   font-style: italic;
@@ -82,28 +65,26 @@ a:hover,
 a:active {
   color: #bccae5;
 }
-/*
- * Standard graphic styles
- */
-.graphic-wrapper {
-  position: relative;
-}
-.graphic {
+#graphic {
   position: relative;
   margin-bottom: 11px;
 }
-.graphic:before,
-.graphic:after {
+#graphic:before,
+#graphic:after {
   content: ' ';
   display: table;
 }
-.graphic:after {
+#graphic:after {
   clear: both;
 }
-.graphic img {
+#graphic img {
   max-width: 100%;
   height: auto;
 }
+.graphic-wrapper {
+  position: relative;
+}
+/* key */
 .key {
   margin: -11px 0 33px 0;
   padding: 0;
@@ -129,8 +110,13 @@ a:active {
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
 }
-svg {
-  overflow: hidden;
+/* chart styles */
+.chart {
+  position: relative;
+}
+line,
+rect {
+  shape-rendering: crispEdges;
 }
 .axis {
   font-size: 11px;
@@ -160,38 +146,6 @@ svg {
 .grid.y g:first-child line {
   display: none;
 }
-.zero-line {
-  stroke: #666;
-  stroke-width: 1px;
-  shape-rendering: crispEdges;
-}
-line,
-rect {
-  shape-rendering: crispEdges;
-}
-.bars rect {
-  fill: #17807e;
-}
-.labels {
-  position: absolute;
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-  border: none;
-}
-.labels li {
-  position: absolute;
-  text-align: right;
-  font-size: 12px;
-  line-height: 1.3;
-  color: #666;
-  display: table;
-  -webkit-font-smoothing: antialiased;
-}
-.labels li span {
-  display: table-cell;
-  vertical-align: middle;
-}
 .value text {
   font-size: 10px;
   -webkit-font-smoothing: antialiased;
@@ -201,6 +155,15 @@ rect {
 }
 .value text.out {
   fill: #999;
+}
+.value text.other {
+  display: none;
+}
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
 }
 .lines {
   fill: none;
